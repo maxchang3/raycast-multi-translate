@@ -1,3 +1,14 @@
+Personal modifications for [antfu/raycast-multi-translate](https://github.com/antfu/raycast-multi-translate/).
+
+- The spellcheck is removed.
+- The action open github is removed.
+- Add sytem-provided word definition to results.
+
+TODO: 
+
+Render html if possible.
+
+<hr>
 <br>
 <br>
 <p align="center">

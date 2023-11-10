@@ -30,6 +30,7 @@ Temporary Items
 build/
 DerivedData/
 assets/spellcheck
+assets/define
 
 ### Node ###
 # Logs

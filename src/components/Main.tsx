@@ -7,9 +7,9 @@ import { getLanguageName, languages, languagesByCode } from '../data/languages'
 import { translateAll } from '../logic/translator'
 import { targetLanguages, useDebouncedValue, useSystemSelection } from '../logic/hooks'
 import { unicodeTransform } from '../logic/text'
-import { spellcheck } from '../logic/spellcheck'
+import { define } from '../logic/define'
 import { webDictionaries } from '../data/web-dictionaries'
-import { SpellcheckItem } from './SpellcheckItem'
+import { DefineItem } from "./DefineItem"
 import { TranslateDetail } from './TranslateDetail'
 
 const langReg = new RegExp(`[>:/](${Object.keys(languagesByCode).join('|')})$`, 'i')
@@ -54,16 +54,16 @@ export function Main(): ReactElement {
       },
     })
 
-  const { data: correctedText } = usePromise(spellcheck, [debouncedText])
+  // const { data: correctedText } = usePromise(spellcheck, [debouncedText])
+  const { data: definedText } = usePromise(define, [debouncedText])
 
   // reset selection when results change
   useEffect(() => {
-    setSelectedId(undefined)
+    setSelectedId(results ? results[0]?.to : undefined)
   }, [results])
 
   const fromLangs = Array.from(new Set(results?.map(i => i.from)))
   const singleSource = fromLangs.length === 1
-
   return (
     <List
       searchBarPlaceholder={systemSelection || 'Enter text to translate'}
@@ -82,7 +82,7 @@ export function Main(): ReactElement {
             key='auto'
             title={singleSource ? `Auto (${getLanguageName(fromLangs[0])})` : 'Auto'}
             value='auto'
-            />
+          />
           <List.Dropdown.Section>
             {targetLanguages.map(lang => (
               <List.Dropdown.Item
@@ -100,7 +100,7 @@ export function Main(): ReactElement {
                   key={lang.code}
                   title={lang.name}
                   value={lang.code}
-              />))}
+                />))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -113,17 +113,17 @@ export function Main(): ReactElement {
       onSelectionChange={(item) => {
         setSelectedId(item ?? undefined)
       }}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open GitHub"
-            url="https://github.com/antfu/raycast-multi-translate"
-            icon={Icon.Code}
-          />
-        </ActionPanel>
-      }
+    // actions={
+    //   <ActionPanel>
+    //     <Action.OpenInBrowser
+    //       title="Open GitHub"
+    //       url="https://github.com/antfu/raycast-multi-translate"
+    //       icon={Icon.Code}
+    //     />
+    //   </ActionPanel>
+    // }
     >
-      {correctedText ? <SpellcheckItem text={sourceText} corrected={correctedText} /> : null}
+      {definedText && !definedText.startsWith("No definition found") ? <DefineItem defined={definedText} /> : undefined}
       {results?.map((item, index) => {
         const webDicts = webDictionaries
           .filter(dic => (dic.sentence || !item.translated.includes(' '))
@@ -178,6 +178,7 @@ export function Main(): ReactElement {
                 </ActionPanel.Section>
               </ActionPanel>
             }
+            
           />
         )
       })}
